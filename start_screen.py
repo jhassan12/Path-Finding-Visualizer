@@ -1,6 +1,7 @@
 from tkinter import font
 from tkinter import ttk
 from grid import init_grid
+from constants import RED
 import tkinter as tk
 import pygame
 
@@ -30,13 +31,14 @@ class TK:
 		# Inputs
 		self.selected_size = tk.StringVar()
 		self.selected_algorithm = tk.StringVar()
+		self.selected_tile_size = tk.StringVar()
 		self.selected_size.set(self.sizes[0])
 		self.selected_algorithm.set(self.algos[0])
 
 		self.combo = ttk.Combobox(self.root, values = self.algos, textvariable = self.selected_algorithm)
 		self.grid_size = ttk.Combobox(self.root, values = self.sizes, textvariable = self.selected_size)
 		self.button = tk.Button(self.root, text = "Start", bg = "black", fg = "white", width = 20, command = self.set_vars)
-		self.tile_size = tk.Entry(self.root, width = 10)
+		self.tile_size = tk.Entry(self.root, width = 10, textvariable = self.selected_tile_size)
 		self.tile_size.insert(tk.END,"50")
 
 		self.place_elements()
@@ -66,22 +68,32 @@ class TK:
 		
 	def run(self):
 		self.root.protocol("WM_DELETE_WINDOW", self.shutdown)
+		self.selected_tile_size.trace("w", self.reset_background_color)
 		self.root.mainloop()
+
+	def reset_background_color(self, *args):
+		if self.tile_size["background"] == "red":
+			self.tile_size.configure({"background": "white"})	
 
 	def set_vars(self):
 		# Fetches the options the user selected
 		algorithm = self.combo.get()
-		tile_size = int(self.tile_size.get())
 		rows, cols = (int(self.grid_size.get().split("x")[0]), int(self.grid_size.get().split("x")[1]))
 
+		# Error handling for tile size input
+		try:
+			tile_size = int(self.tile_size.get())
 
-		# Shutdowns the starting window and begins the main program
-		self.shutdown()
+			# Shutdowns the starting window and begins the main program
+			self.shutdown()
 
-		print("Starting Application...")
-		print("Successfully Loaded!")
+			print("Starting Application...")
+			print("Successfully Loaded!")
 
-		init_grid(algorithm, rows, cols, tile_size)
+			init_grid(algorithm, rows, cols, tile_size)
+		except ValueError:
+			print("Please enter a number!")
+			self.tile_size.configure({"background": "red"})	
 
 	def shutdown(self):
 		self.root.eval('::ttk::CancelRepeat')
