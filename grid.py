@@ -41,7 +41,7 @@ def init_grid(algorithm, rows, cols, tile_size):
 				isRunning = False
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
-				if not thread.isThreading:
+				if not thread.is_threading:
 					if event.button == 3:
 						grid.handle(pygame.mouse.get_pos(), False)
 					else:
