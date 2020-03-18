@@ -124,38 +124,38 @@ class Cell:
 			exclude.add(color)
 
 		# Finds the adjacent cells that are empty
-		if(x < len(g) - 1 and g[x+1][y].color not in exclude):
+		if (x < len(g) - 1 and g[x+1][y].color not in exclude):
 			adjacent.append(g[x+1][y])
 
-		if(x < len(g) - 1 and y > 0 and g[x+1][y-1].color not in exclude):
+		if (x < len(g) - 1 and y > 0 and g[x+1][y-1].color not in exclude):
 			adjacent.append(g[x+1][y-1])
 
-		if(y > 0 and g[x][y-1].color not in exclude):
+		if (y > 0 and g[x][y-1].color not in exclude):
 			adjacent.append(g[x][y-1])
 
-		if(x > 0 and y < len(g[0]) - 1 and g[x-1][y+1].color not in exclude):
+		if (x > 0 and y < len(g[0]) - 1 and g[x-1][y+1].color not in exclude):
 			adjacent.append(g[x-1][y+1])
 
-		if(x > 0 and g[x-1][y].color not in exclude):
+		if (x > 0 and g[x-1][y].color not in exclude):
 			adjacent.append(g[x-1][y])
 
 		if(x > 0 and y > 0 and g[x-1][y-1].color not in exclude):
 			adjacent.append(g[x-1][y-1])
 
-		if(y < len(g[0]) - 1 and g[x][y+1].color not in exclude):
+		if (y < len(g[0]) - 1 and g[x][y+1].color not in exclude):
 			adjacent.append(g[x][y+1])
 
-		if(x < len(g) - 1 and y < len(g[0]) - 1 and g[x+1][y+1].color not in exclude):
+		if (x < len(g) - 1 and y < len(g[0]) - 1 and g[x+1][y+1].color not in exclude):
 			adjacent.append(g[x+1][y+1])
 
 		return adjacent
 
 	def __str__(self):
-		if (self.color == RED):
+		if self.color == RED:
 			return 'R'
-		elif (self.color == GREEN):
+		elif self.color == GREEN:
 			return 'G'
-		elif (self.color == WALLS):
+		elif self.color == WALLS:
 			return '-'
 		else:
 			return '.'
