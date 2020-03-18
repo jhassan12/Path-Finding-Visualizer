@@ -26,6 +26,7 @@ def init_grid(algorithm, rows, cols, tile_size):
 
 	clock = pygame.time.Clock()
 	
+	# Creates the grid and displays it on the window
 	grid = Grid(HEIGHT//TILE_SIZE,WIDTH//TILE_SIZE)
 	grid.draw()
 
