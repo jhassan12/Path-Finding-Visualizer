@@ -26,7 +26,6 @@ def init_grid(algorithm, rows, cols, tile_size):
 
 	clock = pygame.time.Clock()
 	
-	# Creates the grid and displays it on the window
 	grid = Grid(HEIGHT//TILE_SIZE,WIDTH//TILE_SIZE)
 	grid.draw()
 
@@ -58,7 +57,7 @@ def init_grid(algorithm, rows, cols, tile_size):
 
 				if event.key == pygame.K_d:
 					if not (grid.start and grid.finish):
-						return
+						break
 
 					start = grid.matrix[grid.start[0]][grid.start[1]]
 					finish = grid.matrix[grid.finish[0]][grid.finish[1]]
@@ -180,7 +179,6 @@ class Grid:
 				cell.Y = c
 
 	def draw(self):
-		# Draws the grid lines
 		self.fill_matrix()
 
 		# Draws the vertical grid lines
