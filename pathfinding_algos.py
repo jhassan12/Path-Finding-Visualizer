@@ -1,5 +1,5 @@
-from collections import deque
 import heapq
+from collections import deque
 
 def dfs(grid, thread):
 	# Performs depth first search algorithm
