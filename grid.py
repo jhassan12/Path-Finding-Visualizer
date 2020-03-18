@@ -29,27 +29,27 @@ def init_grid(algorithm, rows, cols, tile_size):
 	grid = Grid(HEIGHT//TILE_SIZE,WIDTH//TILE_SIZE)
 	grid.draw()
 
-	placeObstacles = False
-	isRunning = True
+	place_obstacles = False
+	is_running = True
 	thread = Thread()
 
 	# Main loop
-	while isRunning:
+	while is_running:
 		# Handles events
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
-				isRunning = False
+				is_running = False
 
 			if event.type == pygame.MOUSEBUTTONDOWN:
 				if not thread.is_threading:
 					if event.button == 3:
 						grid.handle(pygame.mouse.get_pos(), False)
 					else:
-						placeObstacles = True
+						place_obstacles = True
 
 			if event.type == pygame.MOUSEBUTTONUP:
-				if placeObstacles:
-					placeObstacles = False
+				if place_obstacles:
+					place_obstacles = False
 
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_c:
@@ -76,7 +76,7 @@ def init_grid(algorithm, rows, cols, tile_size):
 
 					t1.start()
 		
-		if placeObstacles:
+		if place_obstacles:
 			grid.handle(pygame.mouse.get_pos(), True)
 
 		clock.tick(FPS)
