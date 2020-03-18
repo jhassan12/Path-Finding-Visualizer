@@ -180,6 +180,7 @@ class Grid:
 				cell.Y = c
 
 	def draw(self):
+		# Draws the grid lines
 		self.fill_matrix()
 
 		# Draws the vertical grid lines
