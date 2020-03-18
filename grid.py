@@ -1,8 +1,8 @@
+import pygame
+import threading
 from constants import *
 from thread import Thread
 from pathfinding_algos import bfs, dfs, dijkstras, A_star
-import pygame
-import threading
 
 def init_grid(algorithm, rows, cols, tile_size):
 	# Creates the start window and initializes the grid
