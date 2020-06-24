@@ -30,8 +30,11 @@ def dfs(grid, thread):
 	# Performs no more processing if the path has not been found
 	if not found:
 		print("Path Not Found!")
+		thread.path_not_found()
 		thread.turn_off()
 		return
+
+	thread.stop_search()
 
 	path = []
 	current = finish.parent
@@ -43,7 +46,7 @@ def dfs(grid, thread):
 		current = current.parent
 
 	path.append(start)
-	grid.create_path(path)
+	grid.create_line_path(path)
 
 	thread.turn_off()
 	
@@ -76,8 +79,11 @@ def bfs(grid, thread):
 	# Performs no more processing if the path has not been found
 	if not found:
 		print("Path Not Found!")
+		thread.path_not_found()
 		thread.turn_off()
 		return
+
+	thread.stop_search()
 
 	# Builds the path from start cell to finish cell
 	path = []
@@ -88,7 +94,7 @@ def bfs(grid, thread):
 		current = current.parent
 
 	path.append(start)
-	grid.create_path(path)
+	grid.create_line_path(path)
 
 	thread.turn_off()
 
@@ -134,8 +140,11 @@ def dijkstras(grid, start, finish, thread):
 	# Performs no more processing if the path has not been found
 	if costs[finish] == float('inf'):
 		print("Path Not Found!")
+		thread.path_not_found()
 		thread.turn_off()
 		return
+
+	thread.stop_search()
 
 	# Builds the shortest path from start cell to finish cell
 	shortest_path = []
@@ -145,7 +154,7 @@ def dijkstras(grid, start, finish, thread):
 		shortest_path.append(current)
 		current = current.parent
 	shortest_path.append(start)
-	grid.create_path(shortest_path)
+	grid.create_line_path(shortest_path)
 
 	thread.turn_off()
 
@@ -197,12 +206,15 @@ def A_star(grid, thread):
 				if neighbor not in heap:
 					# Adds the entry associated with the neighbor to the min heap
 					heapq.heappush(heap, (neighbor.f,(neighbor.X,neighbor.Y),neighbor))
-	
+
 	# Performs no more processing if the path has not been found
 	if not found:
 		print("Path Not Found!")
+		thread.path_not_found()
 		thread.turn_off()
 		return
+
+	thread.stop_search()
 		
 	# Builds the shortest path from start cell to finish cell
 	shortest_path = []
@@ -212,6 +224,7 @@ def A_star(grid, thread):
 		shortest_path.append(current)
 		current = current.parent
 	shortest_path.append(start)
-	grid.create_path(shortest_path)
+	grid.create_line_path(shortest_path)
 
 	thread.turn_off()
+
