@@ -35,8 +35,8 @@ class TK:
 		self.selected_size.set(self.sizes[0])
 		self.selected_algorithm.set(self.algos[0])
 
-		self.combo = ttk.Combobox(self.root, values = self.algos, textvariable = self.selected_algorithm)
-		self.grid_size = ttk.Combobox(self.root, values = self.sizes, textvariable = self.selected_size)
+		self.combo = ttk.Combobox(self.root, values = self.algos, textvariable = self.selected_algorithm, state = "readonly")
+		self.grid_size = ttk.Combobox(self.root, values = self.sizes, textvariable = self.selected_size, state = "readonly")
 		self.button = tk.Button(self.root, text = "Start", bg = "black", fg = "white", width = 20, command = self.set_vars)
 		self.tile_size = tk.Entry(self.root, width = 10, textvariable = self.selected_tile_size)
 		self.tile_size.insert(tk.END,"50")
