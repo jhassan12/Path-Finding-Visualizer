@@ -1,17 +1,53 @@
+import sys
+import os
 import pygame
 import threading
 from constants import *
 from thread import Thread
 from pathfinding_algos import bfs, dfs, dijkstras, A_star
 
+def start_timer(thread):
+	start = pygame.time.get_ticks()
+
+	while thread.is_finding_path and thread.is_threading:
+		now = pygame.time.get_ticks()
+		elapsed = now - start
+
+		seconds, milliseconds = elapsed // 1000, elapsed % 1000
+
+		time = "{}:{:03d}".format(seconds, milliseconds)
+		display_time('Time: ' + time)
+
+	if not thread.path_exists:
+		display_time('Time: ' + 'Path not found')
+
+	thread.reset_path_exists()
+
+def display_algorithm_text(text):
+	rendered_text = font.render(text, True, WHITE)
+	window.blit(rendered_text, [10, HEIGHT + 15])
+	pygame.display.update()
+
+def display_time(text):
+	timer_rect = pygame.Rect(10, HEIGHT + 45, WIDTH - 10, 50)
+	window.fill(BLACK, timer_rect)
+
+	rendered_text = font.render(text, True, WHITE)
+	window.blit(rendered_text, [10, HEIGHT + 50])
+	pygame.display.update()
+
+def init_info_section(algorithm):
+	display_algorithm_text('Algorithm: ' + algorithm)
+	display_time('Time: 0:000')
+
 def init_grid(algorithm, rows, cols, tile_size):
 	# Creates the start window and initializes the grid
-	global window, WIDTH, HEIGHT, TILE_SIZE
+	global window, WIDTH, HEIGHT, TILE_SIZE, font, clock, algo
 
 	# Grid dimensions
-	WIDTH = rows * tile_size
-	HEIGHT = cols * tile_size
-	DIMENSIONS = (WIDTH,HEIGHT)
+	WIDTH = rows * tile_size + 1
+	HEIGHT = cols * tile_size + 1
+	DIMENSIONS = (WIDTH, HEIGHT + 80)
 	TILE_SIZE = tile_size
 
 	# Initalizes Pygame
@@ -21,17 +57,25 @@ def init_grid(algorithm, rows, cols, tile_size):
 	window = pygame.display.set_mode(DIMENSIONS)
 	window.fill(BLACK)
 
+	# Sets Font
+	font = pygame.font.SysFont("arial", 20)
+
 	# Sets Caption
 	pygame.display.set_caption("Path Finding Visualization")
 
 	clock = pygame.time.Clock()
+
+	algo = algorithm
 	
-	grid = Grid(HEIGHT//TILE_SIZE,WIDTH//TILE_SIZE)
+	grid = Grid(HEIGHT//TILE_SIZE, WIDTH//TILE_SIZE)
 	grid.draw()
 
 	place_obstacles = False
 	is_running = True
+
 	thread = Thread()
+
+	init_info_section(algorithm)
 
 	# Main loop
 	while is_running:
@@ -39,30 +83,40 @@ def init_grid(algorithm, rows, cols, tile_size):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				is_running = False
-
-			if event.type == pygame.MOUSEBUTTONDOWN:
-				if not thread.is_threading:
-					if event.button == 3:
-						grid.handle(pygame.mouse.get_pos(), False)
-					else:
-						place_obstacles = True
-
-			if event.type == pygame.MOUSEBUTTONUP:
+			elif event.type == pygame.MOUSEBUTTONDOWN:
+				if thread.is_threading or thread.finished_state:
+					continue
+				
+				if event.button == 3:
+					grid.handle(pygame.mouse.get_pos(), False)
+				else:
+					place_obstacles = True
+			elif event.type == pygame.MOUSEBUTTONUP:
 				if place_obstacles:
 					place_obstacles = False
+			elif event.type == pygame.KEYDOWN:
+				if event.key == pygame.K_ESCAPE:
+					is_running = False
+					os.execl(sys.executable, sys.executable, *sys.argv)
+				elif event.key == pygame.K_c:
+					if thread.is_threading:
+						continue
 
-			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_c:
+					thread.reset_finished_state()
 					grid.clear()
-
-				if event.key == pygame.K_d:
-					if not (grid.start and grid.finish):
-						break
+				elif event.key == pygame.K_d:
+					if not (grid.start and grid.finish) or thread.is_threading or thread.finished_state:
+						continue
 
 					start = grid.matrix[grid.start[0]][grid.start[1]]
 					finish = grid.matrix[grid.finish[0]][grid.finish[1]]
 
 					thread.turn_on()
+
+					algorithm_running = True
+
+					timer = threading.Thread(target = start_timer, args = (thread,))
+					timer.start()
 
 					# Runs the pathfinding algortihm
 					if algorithm == "Dijkstras":
@@ -77,9 +131,12 @@ def init_grid(algorithm, rows, cols, tile_size):
 					t1.start()
 		
 		if place_obstacles:
-			grid.handle(pygame.mouse.get_pos(), True)
+			pos = pygame.mouse.get_pos()
+			grid.handle(pos, True)
 
 		clock.tick(FPS)
+
+	pygame.quit()
 
 class Cell:
 	def __init__(self,rect,c):
@@ -182,12 +239,12 @@ class Grid:
 		self.fill_matrix()
 
 		# Draws the vertical grid lines
-		for x in range(0,WIDTH,TILE_SIZE):
-			pygame.draw.line(window, GRID, (x,0), (x,HEIGHT), 1)
+		for x in range(0, WIDTH, TILE_SIZE):
+			pygame.draw.line(window, GRID, (x,0), (x,HEIGHT - 1), 1)
 
 		# Draws the horizontal grid lines
-		for y in range(0,HEIGHT+1,TILE_SIZE):
-			pygame.draw.line(window, GRID, (0,y), (WIDTH, y), 1)
+		for y in range(0, HEIGHT, TILE_SIZE):
+			pygame.draw.line(window, GRID, (0,y), (WIDTH - 1, y), 1)
 
 		pygame.display.update()
 
@@ -235,13 +292,15 @@ class Grid:
 	def place_start(self, coords, pos):
 		# Places the start cell
 		x,y = pos
-		rect = pygame.Rect(x *  TILE_SIZE + 1, y * TILE_SIZE + 1,TILE_SIZE - 1, TILE_SIZE - 1)
+
+		rect = pygame.Rect(x *  TILE_SIZE + 1, y * TILE_SIZE + 1, TILE_SIZE - 1, TILE_SIZE - 1)
 		cell = Cell(rect,RED)
 		self.place_cell(coords, pos, cell)
 		
 	def place_finish(self, coords, pos):
 		# Places the finish cell
 		x,y = pos
+
 		rect = pygame.Rect(x *  TILE_SIZE + 1, y * TILE_SIZE + 1,TILE_SIZE - 1, TILE_SIZE - 1)
 		cell = Cell(rect,GREEN)
 		self.place_cell(coords, pos, cell)
@@ -249,6 +308,7 @@ class Grid:
 	def place_obstacle(self, coords, pos):
 		# Places the obstacle cell
 		x,y = pos
+
 		rect = pygame.Rect(x * TILE_SIZE + 1, y * TILE_SIZE + 1, TILE_SIZE - 1, TILE_SIZE - 1)
 		cell = Cell(rect,WALLS)
 		self.place_cell(coords, pos, cell)
@@ -291,7 +351,7 @@ class Grid:
 		cell = Cell(rect,FINAL_PATH)
 		cell.draw()
 
-	def create_path(self, path):
+	def create_line_path(self, path):
 		# Draws a line through the shortest path
 		finish = self.matrix[self.finish[0]][self.finish[1]]
 
@@ -299,7 +359,7 @@ class Grid:
 
 		for cell in path:
 			curr = (cell.Y * TILE_SIZE + TILE_SIZE//2, cell.X * TILE_SIZE + TILE_SIZE//2)
-			pygame.draw.line(window, YELLOW, prev, curr, 3)
+			pygame.draw.line(window, LINE_PATH, prev, curr, 3)
 
 			prev = curr
 		
@@ -309,6 +369,10 @@ class Grid:
 	def handle(self,pos, obstacle):
 		# Processes the cell which the user clicked
 		x,y = pos
+
+		# Bounds check
+		if y >= HEIGHT - 1 or x >= WIDTH - 1:
+			return;
 
 		row = x//TILE_SIZE
 		col = y//TILE_SIZE
@@ -354,6 +418,9 @@ class Grid:
 		self.start = None
 		self.finish = None
 		self.fill_matrix()
+
+		init_info_section(algo)
+
 
 	def clear_path(self):
 		# Removes the cells that represent a path
