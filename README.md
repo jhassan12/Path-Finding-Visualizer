@@ -22,5 +22,5 @@ To run the algorithm, press 'd' on your keyboard.
 
 To clear the grid, press 'c' on your keyboard.
 
-To restart the program , press 'esc' on your keyboard.
+To restart the program, press 'esc' on your keyboard.
 
